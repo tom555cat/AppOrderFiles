@@ -68,6 +68,15 @@ extern void AppOrderFiles(void(^completion)(NSString *orderFilePath)) {
             if (node == NULL) {
                 break;
             }
+            // int dladdr(void *addr, Dl_info *info)
+            // dladdr函数检测addr地址描述的代码是否位于由当前可执行文件调用的共享模块中。
+            // 如果存在，则返回共享模块和addr出的符号，并存储于info中。
+            // typedef struct {
+            //    const char *dli_fname;  /* Pathname of shared object that contains address */
+            //    void       *dli_fbase;  /* Base address at which shared object is loaded */
+            //    const char *dli_sname;  /* Name of symbol whose definition overlaps addr */
+            //    void       *dli_saddr;  /* Exact address of symbol named in dli_sname */
+            // } Dl_info;
             Dl_info info = {0};
             dladdr(node->pc, &info);
             if (info.dli_sname) {
