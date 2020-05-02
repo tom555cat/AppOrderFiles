@@ -54,6 +54,11 @@ void __sanitizer_cov_trace_pc_guard(uint32_t *guard) {
     void *PC = __builtin_return_address(0);
     PCNode *node = malloc(sizeof(PCNode));
     *node = (PCNode){PC, NULL};
+    // PC里面保存的是__sanitizer_cov_trace_pc_guard调用完返回的地方，也就是：
+    //
+    // 000000010057a064         bl         ___sanitizer_cov_trace_pc_guard
+    // 000000010057a068         ldr        x8, [sp, #0x30]
+    // PC保存的就是"000000010057a068"
     OSAtomicEnqueue(&queue, node, offsetof(PCNode, next));
 }
 
@@ -80,6 +85,7 @@ extern void AppOrderFiles(void(^completion)(NSString *orderFilePath)) {
             Dl_info info = {0};
             dladdr(node->pc, &info);
             if (info.dli_sname) {
+                // 从注释和实验结果来看info.dli_sname返回的是node->pc所在的函数的函数名字。
                 NSString *name = @(info.dli_sname);
                 BOOL isObjc = [name hasPrefix:@"+["] || [name hasPrefix:@"-["];
                 NSString *symbolName = isObjc ? name : [@"_" stringByAppendingString:name];
